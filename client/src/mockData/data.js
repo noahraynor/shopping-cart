@@ -20,7 +20,7 @@ export const mockProducts = [
   {
     _id: "4",
     title: "Tinker, Tailor, Soldier, Spy - A John le Carre Novel",
-    quantity: 12,
+    quantity: 13,
     price: 13.74,
   },
 ];
