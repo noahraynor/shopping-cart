@@ -1,21 +1,28 @@
 import type { ProductData } from '../types';
-import { useState } from 'react';
+import React from 'react';
 
-interface EditFormProps {
-  setEditMode: React.Dispatch<React.SetStateAction<boolean>>,
+interface EditProductFormProps {
+  setShowEditForm: React.Dispatch<React.SetStateAction<boolean>>,
   product: ProductData,
+  onEditProduct: (updatedProduct: ProductData) => void
 };
 
-export const EditForm = ({ setEditMode, product }: EditFormProps) => {
+export const EditProductForm = ({ setShowEditForm, product, onEditProduct }: EditProductFormProps) => {
 
-  const [productName, setProductName] = useState(product.title);
-  const [productPrice, setProductPrice] = useState(product.price);
-  const [productQuantity, setProductQuantity] = useState(product.quantity);
+  const [productName, setProductName] = React.useState(product.title);
+  const [productPrice, setProductPrice] = React.useState(product.price);
+  const [productQuantity, setProductQuantity] = React.useState(product.quantity);
+
+  const handleEditProduct = (e: React.FormEvent<HTMLFormElement>, updatedProduct: ProductData) => {
+    e.preventDefault();
+    onEditProduct(updatedProduct);
+    setShowEditForm(false);
+  }
 
   return (
     <div className="edit-form">
       <h3>Edit Product</h3>
-      <form>
+      <form onSubmit={(e) => handleEditProduct(e, {_id: product._id, title: productName, quantity: productQuantity, price: productPrice})}>
         <div className="input-group">
           <label htmlFor="product-name">Product Name</label>
           <input
@@ -51,7 +58,7 @@ export const EditForm = ({ setEditMode, product }: EditFormProps) => {
 
         <div className="actions form-actions">
           <button type="submit">Update</button>
-          <button type="button" onClick={() => setEditMode(false)}>Cancel</button>
+          <button type="button" onClick={() => setShowEditForm(false)}>Cancel</button>
         </div>
       </form>
     </div>

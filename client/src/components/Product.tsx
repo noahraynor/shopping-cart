@@ -1,14 +1,20 @@
 import type { ProductData } from '../types';
-import { EditForm } from './EditForm';
+import { EditProductForm } from './EditProductForm';
 import { useState } from 'react';
 
 interface ProductProps {
   product: ProductData,
+  onEditProduct: (updatedProduct: ProductData) => void,
+  onDeleteProduct: (id: string) => void
 };
 
-export const Product = ({ product }: ProductProps) => {
+export const Product = ({ product, onEditProduct, onDeleteProduct }: ProductProps) => {
 
-  const [editMode, setEditMode] = useState<boolean>(false);
+  const [showEditForm, setShowEditForm] = useState<boolean>(false);
+
+  const inStock = (): boolean => {
+    return product.quantity > 0;
+  }
 
   return (
     <li className="product">
@@ -17,15 +23,20 @@ export const Product = ({ product }: ProductProps) => {
         <p className="price">${product.price}</p>
         <p className="quantity">{product.quantity} left in stock</p>
         <div className="actions product-actions">
-          <button className="add-to-cart">Add to Cart</button>
-          <button className="edit" onClick={() => setEditMode(true)}>Edit</button>
+          <button className="add-to-cart" disabled={inStock() ? false : true}>Add to Cart</button>
+          <button className="edit" onClick={() => setShowEditForm((showEditForm) => !showEditForm)}>Edit</button>
         </div>
-        <button className="delete-button"><span>X</span></button>
+        <button className="delete-button" onClick={() => onDeleteProduct(product._id)}><span>X</span></button>
       </div>
 
       {
-        editMode && (
-          <EditForm setEditMode={setEditMode} product={product}/>
+        showEditForm && (
+          <
+            EditProductForm 
+              setShowEditForm={setShowEditForm} 
+              product={product}
+              onEditProduct={onEditProduct}
+          />
         )
       }
     </li>
