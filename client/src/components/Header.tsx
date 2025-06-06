@@ -9,9 +9,9 @@ export const Header = ({ cart }: HeaderProps) => {
   const getCartTotal = (): number => {
     let result = 0;
     cart.forEach(cartItem => {
-      result += cartItem.price;
+      result += (cartItem.price * cartItem.quantity);
     });
-    return result;
+    return result
   };
 
   return (
@@ -45,14 +45,14 @@ export const Header = ({ cart }: HeaderProps) => {
                       <tr key={cartItem._id}>
                         <td>{cartItem.title}</td>
                         <td>{cartItem.quantity}</td>
-                        <td>{cartItem.price}</td>
+                        <td>${cartItem.price}</td>
                       </tr>
                     );
                   })}
                 </tbody>
                 <tfoot>
                   <tr>
-                    <td colSpan={3} className="total">Total: ${getCartTotal()}</td>
+                    <td colSpan={3} className="total">Total: ${getCartTotal().toFixed(2)}</td>
                   </tr>
                 </tfoot>
               </table>

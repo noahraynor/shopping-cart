@@ -1,3 +1,5 @@
+export type NewProduct = Omit<ProductData, '_id'>;
+
 export interface ProductData {
   _id: string,
   title: string,

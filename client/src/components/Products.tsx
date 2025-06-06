@@ -1,11 +1,13 @@
 import type { ProductData } from '../types';
 import { Product } from './Product';
 
-interface ProductListingProps {
+interface ProductsProps {
   products: ProductData[],
+  onEditProduct: (updatedProduct: ProductData) => void,
+  onDeleteProduct: (id: string) => void,
 };
 
-export const ProductListing = ({ products }: ProductListingProps) => {
+export const Products = ({ products, onEditProduct, onDeleteProduct }: ProductsProps) => {
   return (
     <>
       {
@@ -16,7 +18,7 @@ export const ProductListing = ({ products }: ProductListingProps) => {
               {
                 products.map(product => {
                   return (
-                    <Product key={product._id} product={product} />
+                    <Product key={product._id} product={product} onDeleteProduct={onDeleteProduct} onEditProduct={onEditProduct} />
                   );
                 })
               }
