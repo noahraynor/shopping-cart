@@ -5,6 +5,9 @@ export interface ProductData {
   title: string,
   quantity: number,
   price: number,
+  createdAt?: string,
+  updatedAt?: string,
+  _v?: number,
 }
 
 export interface CartItemData {

@@ -180,3 +180,7 @@ table td.total {
   padding-top: 20px;
 }
 
+button+button {
+  margin-left: 2px;
+}
+

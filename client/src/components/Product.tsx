@@ -8,7 +8,13 @@ interface ProductProps {
   onDeleteProduct: (id: string) => void
 };
 
-export const Product = ({ product, onEditProduct, onDeleteProduct }: ProductProps) => {
+export const Product = (
+  { 
+    product, 
+    onEditProduct, 
+    onDeleteProduct 
+  }: ProductProps
+) => {
 
   const [showEditForm, setShowEditForm] = useState<boolean>(false);
 
@@ -23,10 +29,28 @@ export const Product = ({ product, onEditProduct, onDeleteProduct }: ProductProp
         <p className="price">${product.price}</p>
         <p className="quantity">{product.quantity} left in stock</p>
         <div className="actions product-actions">
-          <button className="add-to-cart" disabled={inStock() ? false : true}>Add to Cart</button>
-          <button className="edit" onClick={() => setShowEditForm((showEditForm) => !showEditForm)}>Edit</button>
-        </div>
-        <button className="delete-button" onClick={() => onDeleteProduct(product._id)}><span>X</span></button>
+          {!showEditForm && (
+            <>
+              <button 
+                className="add-to-cart" 
+                disabled={inStock() ? false : true}
+              >
+                Add to Cart
+              </button>
+              <button 
+                className="edit" 
+                onClick={() => setShowEditForm((showEditForm) => !showEditForm)}
+              >
+                Edit
+              </button>
+            </>
+          )}
+          </div>
+        <button 
+          className="delete-button" 
+          onClick={() => onDeleteProduct(product._id)}>
+            <span>X</span>
+        </button>
       </div>
 
       {
