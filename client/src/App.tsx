@@ -1,10 +1,11 @@
 import React from 'react';
-import axios from 'axios';
 import type { ProductData, CartItemData, NewProduct } from './types';
 import { Products } from './components/Products';
-import { AddProductButton } from './components/AddProductButton';
+import { ToggleableAddProductForm } from './components/ToggleableAddProductForm';
 import { Header } from './components/Header';
-
+import { 
+  addProduct, fetchProducts, fetchCart, deleteProduct, editProduct 
+} from './services/apiService';
 
 const App = () => {
 
@@ -13,53 +14,50 @@ const App = () => {
 
 
   React.useEffect((): void => {
-    const fetchProducts = async (): Promise<void> => {
+    const getProducts = async (): Promise<void> => {
       try {
-        let { data } = await axios.get('/api/products');
-        console.log(data)
-        setProducts(data);
+        const fetchedProducts = await fetchProducts();
+        setProducts(fetchedProducts);
       } catch(e: unknown) {
-        console.log(e);
-      }
-    };
-
-    const fetchCart = async (): Promise<void> => {
-      try {
-        let { data } = await axios.get('/api/cart');
-        console.log(data)
-        setCart(data);
-      } catch (e: unknown) {
-        console.log(e);
+        console.error(e);
       }
     }
 
-    fetchCart();
-    fetchProducts();
+    const getCart = async (): Promise<void> => {
+      try {
+        const fetchedCart = await fetchCart();
+        setCart(fetchedCart);
+      } catch (e: unknown) {
+        console.error(e);
+      }
+    }
+
+    getProducts();
+    getCart();
   }, []);
 
 
   const handleAddProduct = async (newProduct: NewProduct): Promise<void> => {
     try {
-      const result = await axios.post('/api/products', newProduct);
-      const processedProduct = result.data;
-      setProducts((oldProducts: ProductData[]) => [...oldProducts, processedProduct]);
-    } catch (e: unknown) {
-      console.log(e);
+      const addedProduct = await addProduct(newProduct);
+      setProducts((oldProducts: ProductData[]) => [...oldProducts, addedProduct]);
+    } catch (e) {
+      console.error(e);
     }
   }
 
 
   const handleDeleteProduct = async (id: string): Promise<void> => {
     try {
-      await axios.delete(`/api/products/${id}`);
+      await deleteProduct(id);
       setProducts((oldProducts) => oldProducts.filter(product => product._id !== id));
     } catch (e: unknown) {
-      console.log(e);
+      console.error(e);
     }
   }
 
 
-  const handleEditProduct = async (updatedProduct: ProductData): Promise<void> => {
+  const handleEditProduct = async (newProductData: ProductData): Promise<void> => {
     const createUpdatedProducts = (oldProducts: ProductData[], updatedProductData: ProductData): ProductData[] => {
       return oldProducts.map(product => {
         if (product._id === updatedProductData._id) {
@@ -71,11 +69,10 @@ const App = () => {
     }
 
     try {
-      const result = await axios.put(`/api/products/${updatedProduct._id}`, updatedProduct);
-      const updatedProductData = result.data;
+      const updatedProductData = await editProduct(newProductData)
       setProducts((oldProducts) => createUpdatedProducts(oldProducts, updatedProductData));
     } catch (e: unknown) {
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -85,7 +82,7 @@ const App = () => {
       <Header cart={cart}/>
       <main>
         <Products products={products} onEditProduct={handleEditProduct} onDeleteProduct={handleDeleteProduct}/>
-        <AddProductButton onAddProduct={handleAddProduct}/>
+        <ToggleableAddProductForm onAddProduct={handleAddProduct}/>
       </main>
     </div>
   );

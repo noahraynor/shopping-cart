@@ -2,11 +2,16 @@ import { AddProductForm } from './AddProductForm';
 import React from 'react';
 import type { NewProduct } from '../types'
 
-interface AddProductButtonProps {
+
+interface ToggleableAddProductFormProps {
   onAddProduct: (newProduct: NewProduct) => void,
 }
 
-export const AddProductButton = ({ onAddProduct }: AddProductButtonProps) => {
+export const ToggleableAddProductForm = (
+  { 
+    onAddProduct 
+  }: ToggleableAddProductFormProps
+) => {
   const [addProductVisible, setAddProductVisible] = React.useState<boolean>(false);
 
   return (
