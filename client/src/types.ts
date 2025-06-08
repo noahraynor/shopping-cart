@@ -1,19 +1,6 @@
+import { z } from "zod";
+import { productSchema, cartItemSchema } from './schema.ts';
+
+export type ProductData = z.infer<typeof productSchema>;
+export type CartItemData = z.infer<typeof cartItemSchema>;
 export type NewProduct = Omit<ProductData, '_id'>;
-
-export interface ProductData {
-  _id: string,
-  title: string,
-  quantity: number,
-  price: number,
-  createdAt?: string,
-  updatedAt?: string,
-  _v?: number,
-}
-
-export interface CartItemData {
-  _id: string,
-  productID: string,
-  title: string,
-  quantity: number,
-  price: number,
-}
