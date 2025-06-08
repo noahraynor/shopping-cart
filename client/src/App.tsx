@@ -4,7 +4,13 @@ import { Products } from './components/Products';
 import { ToggleableAddProductForm } from './components/ToggleableAddProductForm';
 import { Header } from './components/Header';
 import { 
-  addProduct, fetchProducts, fetchCart, deleteProduct, editProduct 
+  addProduct, 
+  fetchProducts, 
+  fetchCart, 
+  deleteProduct, 
+  editProduct,  
+  addToCart,
+  checkout,
 } from './services/apiService';
 
 const App = () => {
@@ -47,6 +53,48 @@ const App = () => {
   }
 
 
+
+  const handleAddToCart = async (id: string): Promise<void> => {
+    const getUpdatedCart = (oldCart: CartItemData[], newItem: CartItemData) => {
+      if (!itemIsInCart(oldCart)) {
+        return [...oldCart, newItem];
+      } else {
+        return oldCart.map((oldItem) => {
+          if (oldItem.productId === id) {
+            return newItem;
+          } else {
+            return oldItem;
+          }
+        });
+      }
+    }
+
+    const itemIsInCart = (oldCart: CartItemData[]): boolean => {
+      return !!oldCart.find((cartItem) => {
+        return cartItem.productId === id;
+      });
+    }
+
+    try {
+      const result = await addToCart(id);
+      setProducts((oldProducts) => createUpdatedProducts(oldProducts, result.product));
+      setCart((oldCart) => getUpdatedCart(oldCart, result.item));
+    } catch (e: unknown) {
+      console.log(e)
+    }
+  }
+
+
+  const handleCheckout = async () => {
+    try {
+      await checkout();
+      setCart([]);
+    } catch (e: unknown) {
+      console.log(e);
+    }
+  }
+
+
   const handleDeleteProduct = async (id: string): Promise<void> => {
     try {
       await deleteProduct(id);
@@ -57,17 +105,18 @@ const App = () => {
   }
 
 
-  const handleEditProduct = async (newProductData: ProductData): Promise<void> => {
-    const createUpdatedProducts = (oldProducts: ProductData[], updatedProductData: ProductData): ProductData[] => {
-      return oldProducts.map(product => {
-        if (product._id === updatedProductData._id) {
-          return updatedProductData;
-        } else {
-          return product;
-        }
-      });
-    }
+  const createUpdatedProducts = (oldProducts: ProductData[], updatedProductData: ProductData): ProductData[] => {
+    return oldProducts.map(product => {
+      if (product._id === updatedProductData._id) {
+        return updatedProductData;
+      } else {
+        return product;
+      }
+    });
+  }
 
+
+  const handleEditProduct = async (newProductData: ProductData): Promise<void> => {
     try {
       const updatedProductData = await editProduct(newProductData)
       setProducts((oldProducts) => createUpdatedProducts(oldProducts, updatedProductData));
@@ -79,9 +128,14 @@ const App = () => {
 
   return (
     <div id="app">
-      <Header cart={cart}/>
+      <Header cart={cart} onCheckout={handleCheckout}/>
       <main>
-        <Products products={products} onEditProduct={handleEditProduct} onDeleteProduct={handleDeleteProduct}/>
+        <Products 
+          products={products} 
+          onEditProduct={handleEditProduct} 
+          onDeleteProduct={handleDeleteProduct}
+          onAddToCart={handleAddToCart}
+        />
         <ToggleableAddProductForm onAddProduct={handleAddProduct}/>
       </main>
     </div>

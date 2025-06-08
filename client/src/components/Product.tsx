@@ -5,14 +5,16 @@ import { useState } from 'react';
 interface ProductProps {
   product: ProductData,
   onEditProduct: (updatedProduct: ProductData) => void,
-  onDeleteProduct: (id: string) => void
+  onDeleteProduct: (id: string) => void,
+  onAddToCart: (id: string) => void,
 };
 
 export const Product = (
   { 
     product, 
     onEditProduct, 
-    onDeleteProduct 
+    onDeleteProduct,
+    onAddToCart,
   }: ProductProps
 ) => {
 
@@ -20,6 +22,11 @@ export const Product = (
 
   const inStock = (): boolean => {
     return product.quantity > 0;
+  }
+
+  const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    onAddToCart(product._id);
   }
 
   return (
@@ -34,6 +41,7 @@ export const Product = (
               <button 
                 className="add-to-cart" 
                 disabled={inStock() ? false : true}
+                onClick={(e) => handleAddToCart(e)}
               >
                 Add to Cart
               </button>
@@ -48,6 +56,7 @@ export const Product = (
           </div>
         <button 
           className="delete-button" 
+          data-testid={product._id}
           onClick={() => onDeleteProduct(product._id)}>
             <span>X</span>
         </button>
