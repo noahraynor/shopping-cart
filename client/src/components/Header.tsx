@@ -2,9 +2,10 @@ import type { CartItemData } from '../types';
 
 interface HeaderProps {
   cart: CartItemData[],
+  onCheckout: () => void,
 };
 
-export const Header = ({ cart }: HeaderProps) => {
+export const Header = ({ cart, onCheckout }: HeaderProps) => {
 
   const getCartTotal = (): number => {
     let result = 0;
@@ -56,7 +57,7 @@ export const Header = ({ cart }: HeaderProps) => {
                   </tr>
                 </tfoot>
               </table>
-              <button className="checkout">Checkout</button>
+              <button className="checkout" onClick={onCheckout}>Checkout</button>
             </>
           )
         }

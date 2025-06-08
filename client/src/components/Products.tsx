@@ -5,9 +5,10 @@ interface ProductsProps {
   products: ProductData[],
   onEditProduct: (updatedProduct: ProductData) => void,
   onDeleteProduct: (id: string) => void,
+  onAddToCart: (id: string) => void,
 };
 
-export const Products = ({ products, onEditProduct, onDeleteProduct }: ProductsProps) => {
+export const Products = ({ products, onEditProduct, onDeleteProduct, onAddToCart }: ProductsProps) => {
   return (
     <>
       {
@@ -18,7 +19,13 @@ export const Products = ({ products, onEditProduct, onDeleteProduct }: ProductsP
               {
                 products.map(product => {
                   return (
-                    <Product key={product._id} product={product} onDeleteProduct={onDeleteProduct} onEditProduct={onEditProduct} />
+                    <Product 
+                      key={product._id} 
+                      product={product} 
+                      onDeleteProduct={onDeleteProduct} 
+                      onEditProduct={onEditProduct} 
+                      onAddToCart={onAddToCart}
+                    />
                   );
                 })
               }
