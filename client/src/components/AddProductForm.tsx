@@ -7,7 +7,11 @@ interface AddProductFormProps {
   onAddProduct: (newProduct: NewProduct) => void,
 };
 
-export const AddProductForm = ({ setAddProductVisible, onAddProduct }: AddProductFormProps) => {
+export const AddProductForm = (
+  { 
+    setAddProductVisible, 
+    onAddProduct 
+  }: AddProductFormProps) => {
   const [productName, setProductName] = React.useState<string>("");
   const [productPrice, setProductPrice] = React.useState<string>("");
   const [productQuantity, setProductQuantity] = React.useState<string>("");
@@ -20,8 +24,14 @@ export const AddProductForm = ({ setAddProductVisible, onAddProduct }: AddProduc
 
   const handleAddProduct = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
-    onAddProduct({title: productName, quantity: Number(productQuantity), price: Number(productPrice)})
+    onAddProduct(
+      {
+        title: productName, 
+        quantity: Number(productQuantity),
+        price: Number(productPrice)
+      });
     clearAddProduct();
+    setAddProductVisible(false);
   };
 
   return (
