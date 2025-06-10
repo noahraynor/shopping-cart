@@ -41,3 +41,13 @@ export const Products = ({ products, onEditProduct, onDeleteProduct, onAddToCart
     </>
   );
 };
+
+const Search = () => {
+  return (
+    <>
+      <button>Search1</button>
+      <button>Search2</button>
+      <button>Search3</button>
+    </>
+  )
+}

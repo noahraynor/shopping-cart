@@ -44,7 +44,13 @@ export const deleteProduct = async (id: string): Promise<void> => {
 
 export const editProduct = async (updatedProduct: ProductData): Promise<ProductData> => {
   try {
-    const result = await axios.put(`/api/products/${updatedProduct._id}`, updatedProduct);
+    const result = await axios.put(
+      `/api/products/${updatedProduct._id}`, 
+      { 
+        title: updatedProduct.title, 
+        price: updatedProduct.price, 
+        quantity: updatedProduct.quantity
+      });
     return productSchema.parse(result.data);
   } catch (e: unknown) {
     console.log(e);
