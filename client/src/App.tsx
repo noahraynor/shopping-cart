@@ -13,17 +13,143 @@ import {
   checkout,
 } from './services/apiService';
 
+interface AddProductAction {
+  type: "Add_Product",
+  payload: {
+    newProduct: ProductData,
+  }
+}
+
+interface GetProductAction {
+  type: "Get_Products",
+  payload: {
+    products: ProductData[];
+  }
+}
+
+interface UpdateProduct {
+  type: "Update_Product",
+  payload: {
+    updatedProduct: ProductData,
+  }
+}
+
+interface DeleteProduct {
+  type: "Delete_Product",
+  payload: {
+    id: string,
+  }
+}
+
+type ProductAction = 
+  | AddProductAction
+  | GetProductAction
+  | UpdateProduct
+  | DeleteProduct;
+
+  const updateProductsHelper = (currentProducts: ProductData[], updatedProductData: ProductData): ProductData[] => {
+    return currentProducts.map(currentProduct => {
+      if (currentProduct._id === updatedProductData._id) {
+        return updatedProductData;
+      } else {
+        return currentProduct;
+      }
+    });
+  }
+
+const productsReducer = 
+  (
+    currentState: ProductData[], 
+    action: ProductAction,
+  ): ProductData[] => {
+    switch (action.type) {
+      case "Add_Product":
+        return [...currentState, action.payload.newProduct];
+      case "Get_Products":
+        return action.payload.products;
+      case "Update_Product":
+        return updateProductsHelper(currentState, action.payload.updatedProduct);
+      case "Delete_Product":
+        return currentState.filter(product => product._id !== action.payload.id);
+      default:
+        throw new Error(`Unknown product action type`);
+    }
+  };
+
+  interface GetCart {
+    type: "Get_Cart",
+    payload: {
+      cart: CartItemData[],
+    }
+  }
+
+  interface AddToCart {
+    type: "Add_To_Cart",
+    payload: {
+      item: CartItemData,
+    }
+  }
+
+  interface Checkout {
+    type: "Checkout",
+  }
+
+  type CartAction = 
+    | GetCart
+    | AddToCart
+    | Checkout;
+
+  const getUpdatedCart = (currentCart: CartItemData[], newItem: CartItemData) => {
+    if (!itemInCart(currentCart, newItem.productId)) {
+      return [...currentCart, newItem];
+    } else {
+      return currentCart.map((currentItem) => {
+        if (currentItem.productId === newItem.productId) {
+          return newItem;
+        } else {
+          return currentItem;
+        }
+      });
+    }
+  }
+
+  const itemInCart = (currentCart: CartItemData[], id: string): boolean => {
+    return !!currentCart.find((cartItem) => {
+      return cartItem.productId === id;
+    });
+  }
+
+  const cartReducer = 
+  (
+    currentState: CartItemData[], 
+    action: CartAction
+  ): CartItemData[] => {
+    switch (action.type) {
+      case 'Get_Cart':
+        return action.payload.cart;
+      case 'Add_To_Cart':
+        return getUpdatedCart(currentState, action.payload.item);
+      case 'Checkout':
+        return [];
+      default:
+        throw new Error('Unkown cart action type');
+    }
+  }
+
 const App = () => {
 
-  const [products, setProducts] = React.useState<ProductData[]>([]);
-  const [cart, setCart] = React.useState<CartItemData[]>([]);
+  const [productsState, productDispatch] = React.useReducer(
+    productsReducer,
+    [],
+  );
 
+  const [cartState, cartDispatch] = React.useReducer(cartReducer, []);
 
   React.useEffect((): void => {
     const getProducts = async (): Promise<void> => {
       try {
-        const fetchedProducts = await fetchProducts();
-        setProducts(fetchedProducts);
+        const newProducts = await fetchProducts();
+        productDispatch({ type: "Get_Products", payload: {products: newProducts} })
       } catch(e: unknown) {
         console.error(e);
       }
@@ -32,7 +158,7 @@ const App = () => {
     const getCart = async (): Promise<void> => {
       try {
         const fetchedCart = await fetchCart();
-        setCart(fetchedCart);
+        cartDispatch({ type: "Get_Cart", payload: {cart: fetchedCart} })
       } catch (e: unknown) {
         console.error(e);
       }
@@ -46,93 +172,68 @@ const App = () => {
   const handleAddProduct = async (newProduct: NewProduct): Promise<void> => {
     try {
       const addedProduct = await addProduct(newProduct);
-      setProducts((oldProducts: ProductData[]) => [...oldProducts, addedProduct]);
+      productDispatch({ type: "Add_Product", payload: {newProduct: addedProduct} })
     } catch (e) {
       console.error(e);
     }
   }
 
+  const handleDeleteProduct = async (id: string): Promise<void> => {
+    try {
+      await deleteProduct(id);
+      productDispatch({ type: "Delete_Product", payload: {id} })
+    } catch (e: unknown) {
+      console.error(e);
+    }
+  }
 
+  const handleUpdateProduct = async (updatedProductData: ProductData): Promise<void> => {
+    try {
+      const updatedProduct = await editProduct(updatedProductData)
+      productDispatch(
+        { 
+          type: "Update_Product", 
+          payload: {updatedProduct: updatedProduct} 
+        }
+      )
+    } catch (e: unknown) {
+      console.error(e);
+    }
+  }
 
   const handleAddToCart = async (id: string): Promise<void> => {
-    const getUpdatedCart = (oldCart: CartItemData[], newItem: CartItemData) => {
-      if (!itemIsInCart(oldCart)) {
-        return [...oldCart, newItem];
-      } else {
-        return oldCart.map((oldItem) => {
-          if (oldItem.productId === id) {
-            return newItem;
-          } else {
-            return oldItem;
-          }
-        });
-      }
-    }
-
-    const itemIsInCart = (oldCart: CartItemData[]): boolean => {
-      return !!oldCart.find((cartItem) => {
-        return cartItem.productId === id;
-      });
-    }
-
     try {
       const result = await addToCart(id);
-      setProducts((oldProducts) => createUpdatedProducts(oldProducts, result.product));
-      setCart((oldCart) => getUpdatedCart(oldCart, result.item));
+      productDispatch({ type: "Update_Product", payload: {updatedProduct: result.product} })
+      cartDispatch( {type: "Add_To_Cart", payload: {item: result.item}} )
     } catch (e: unknown) {
       console.log(e)
     }
   }
 
-
   const handleCheckout = async () => {
     try {
       await checkout();
-      setCart([]);
+      cartDispatch( {type: "Checkout"})
     } catch (e: unknown) {
       console.log(e);
     }
   }
 
 
-  const handleDeleteProduct = async (id: string): Promise<void> => {
-    try {
-      await deleteProduct(id);
-      setProducts((oldProducts) => oldProducts.filter(product => product._id !== id));
-    } catch (e: unknown) {
-      console.error(e);
-    }
-  }
 
 
-  const createUpdatedProducts = (oldProducts: ProductData[], updatedProductData: ProductData): ProductData[] => {
-    return oldProducts.map(product => {
-      if (product._id === updatedProductData._id) {
-        return updatedProductData;
-      } else {
-        return product;
-      }
-    });
-  }
 
 
-  const handleEditProduct = async (newProductData: ProductData): Promise<void> => {
-    try {
-      const updatedProductData = await editProduct(newProductData)
-      setProducts((oldProducts) => createUpdatedProducts(oldProducts, updatedProductData));
-    } catch (e: unknown) {
-      console.error(e);
-    }
-  }
 
 
   return (
     <div id="app">
-      <Header cart={cart} onCheckout={handleCheckout}/>
+      <Header cart={cartState} onCheckout={handleCheckout}/>
       <main>
         <Products 
-          products={products} 
-          onEditProduct={handleEditProduct} 
+          products={productsState} 
+          onEditProduct={handleUpdateProduct} 
           onDeleteProduct={handleDeleteProduct}
           onAddToCart={handleAddToCart}
         />
